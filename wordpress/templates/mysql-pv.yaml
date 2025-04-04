@@ -11,7 +11,7 @@ spec:
   accessModes:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
-  storageClassName: gp2
+  storageClassName: ebs-gp3
   awsElasticBlockStore:
     volumeID: vol-0a73671035a1dcb33   # <-- Replace with your actual EBS volume ID
     fsType: ext4
