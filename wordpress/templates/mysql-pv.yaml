@@ -4,7 +4,7 @@ metadata:
   name: mysql-pv
   labels:
     app.kubernetes.io/instance: wordpress
-    type: ebs
+    type: local
 spec:
   capacity:
     storage: 10Gi
@@ -13,3 +13,5 @@ spec:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
   storageClassName: gp3
+  hostPath:
+    path: /mnt/data/mysql
