@@ -8,8 +8,7 @@ metadata:
 spec:
   accessModes:
     - ReadWriteOnce
-  storageClassName: ebs-gp3
-  volumeName: mysql-pv   # 👈 Add this here
+  storageClassName: gp3
   resources:
     requests:
       storage: 10Gi
