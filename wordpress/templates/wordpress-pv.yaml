@@ -3,6 +3,7 @@ kind: PersistentVolume
 metadata:
   name: wordpress-pv
   labels:
+    app.kubernetes.io/instance: wordpress
     type: ebs
 spec:
   capacity:
@@ -13,5 +14,5 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: ebs-gp3
   awsElasticBlockStore:
-    volumeID: vol-0cd79c3b99158af11   # <-- Replace with your actual EBS Volume ID
+    volumeID: vol-0cd79c3b99158af11
     fsType: ext4
