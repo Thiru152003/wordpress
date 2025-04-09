@@ -23,4 +23,4 @@ mysql:
 
 ingress:
   enabled: true
-  host: wordpress.example.com
+  host: docs.cloudmasa.com
