@@ -1,12 +1,19 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: wordpress-ingress
+  name: ingress-nginx
+  namespace: wordpress
   annotations:
     kubernetes.io/ingress.class: "nginx"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    acme.cert-manager.io/http01-edit-in-place: "true"
 spec:
+  tls:
+  - hosts:
+    - doc.cloudmasa.com.com
+    secretName: yourdomain-tls
   rules:
-  - host: {{ .Values.ingress.host }}
+  - host: docs.cloudmasa.com
     http:
       paths:
       - path: /
