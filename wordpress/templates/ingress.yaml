@@ -11,7 +11,7 @@ spec:
   tls:
   - hosts:
     - docs.cloudmasa.com.com
-    secretName: yourdomain-tls
+    secretName: docs.cloudmasa-tls
   rules:
   - host: docs.cloudmasa.com
     http:
