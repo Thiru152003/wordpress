@@ -10,7 +10,7 @@ metadata:
 spec:
   tls:
   - hosts:
-    - doc.cloudmasa.com.com
+    - docs.cloudmasa.com.com
     secretName: yourdomain-tls
   rules:
   - host: docs.cloudmasa.com
