@@ -5,7 +5,7 @@ metadata:
   annotations:
     service.beta.kubernetes.io/aws-load-balancer-type: "nlb" # NLB for AWS
     service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
-    service.beta.kubernetes.io/aws-load-balancer-eip-allocations: "eipalloc-012c73e9eb32da96c,eipalloc-03a6740de065a85d0" 
+    service.beta.kubernetes.io/aws-load-balancer-eip-allocations: "eipalloc-09afdc77cd6f538a6,eipalloc-09fc2d0c4e5afdf3a" 
 spec:
   selector:
     app: wordpress
