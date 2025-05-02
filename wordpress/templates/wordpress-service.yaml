@@ -3,9 +3,8 @@ kind: Service
 metadata:
   name: wordpress
   annotations:
-    service.beta.kubernetes.io/aws-load-balancer-type: "nlb" # NLB for AWS
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
     service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
-    service.beta.kubernetes.io/aws-load-balancer-eip-allocations: "" 
 spec:
   selector:
     app: wordpress
