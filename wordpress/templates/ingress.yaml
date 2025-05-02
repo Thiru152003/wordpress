@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: ingress-nginx
+  name: wordpress-ingress
   namespace: wordpress
   annotations:
     kubernetes.io/ingress.class: "nginx"
@@ -9,17 +9,17 @@ metadata:
     acme.cert-manager.io/http01-edit-in-place: "true"
 spec:
   tls:
-  - hosts:
-    - docs.cloudmasa.com
-    secretName: docs.cloudmasa-tls
+    - hosts:
+        - docs.cloudmasa.com
+      secretName: docs-cloudmasa-tls
   rules:
-  - host: docs.cloudmasa.com
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: wordpress
-            port:
-              number: 80
+    - host: docs.cloudmasa.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: wordpress
+                port:
+                  number: 80
