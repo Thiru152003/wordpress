@@ -13,23 +13,28 @@ spec:
       labels:
         app: wordpress
     spec:
+      automountServiceAccountToken: false
       securityContext:
         fsGroup: 33
         fsGroupChangePolicy: "OnRootMismatch"
       initContainers:
-        - name: volume-permissions
+        - name: volume-prep
           image: busybox:1.35
-          command: ["/bin/sh", "-c", "chown -R 33:33 /var/www/html && chmod -R 775 /var/www/html"]
+          command: ["sh", "-c", "mkdir -p /var/www/html && chown -R 33:33 /var/www/html && chmod -R 775 /var/www/html"]
           securityContext:
-            runAsUser: 0  # Root required to set ownership
+            runAsUser: 0  # Root needed to set ownership
           volumeMounts:
             - name: wordpress-data
               mountPath: /var/www/html
       containers:
         - name: wordpress
           image: wordpress:6.7-apache
+          securityContext:
+            runAsUser: 33
+            runAsGroup: 33
+            allowPrivilegeEscalation: false
           ports:
-            - containerPort: 80
+            - containerPort: 8080  # Use non-root port
           env:
             - name: WORDPRESS_DB_HOST
               value: "mysql.wordpress.svc.cluster.local:3306"
@@ -51,23 +56,21 @@ spec:
             - name: WORDPRESS_CONFIG_EXTRA
               value: |
                 define('FS_METHOD', 'direct');
-          securityContext:
-            runAsUser: 33
-            runAsGroup: 33
-            allowPrivilegeEscalation: false
+                define('WP_SITEURL', 'http://blog.cloudmasa.com');
+                define('WP_HOME', 'http://blog.cloudmasa.com');
           volumeMounts:
             - name: wordpress-data
               mountPath: /var/www/html
           livenessProbe:
             httpGet:
               path: /
-              port: 80
+              port: 8080
             initialDelaySeconds: 60
             periodSeconds: 10
           readinessProbe:
             httpGet:
               path: /
-              port: 80
+              port: 8080
             initialDelaySeconds: 30
             periodSeconds: 10
       volumes:
