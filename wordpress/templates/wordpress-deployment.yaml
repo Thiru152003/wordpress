@@ -15,18 +15,14 @@ spec:
     spec:
       automountServiceAccountToken: false
       securityContext:
-        runAsNonRoot: true
-        runAsUser: 1000
         fsGroup: 1000
         fsGroupChangePolicy: "OnRootMismatch"
-        allowPrivilegeEscalation: false
-        capabilities:
-          drop:
-            - ALL
       initContainers:
         - name: init-permissions
           image: busybox:1.35
           command: ["sh", "-c", "chown -R 1000:1000 /var/www/html && chmod -R 755 /var/www/html"]
+          securityContext:
+            runAsUser: 0  # Run as root temporarily to set permissions
           volumeMounts:
             - name: wordpress-data
               mountPath: /var/www/html
@@ -60,6 +56,13 @@ spec:
           volumeMounts:
             - name: wordpress-data
               mountPath: /var/www/html
+          securityContext:
+            runAsUser: 1000
+            runAsGroup: 1000
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
           resources:
             requests:
               memory: "256Mi"
@@ -81,9 +84,6 @@ spec:
             initialDelaySeconds: 10
             periodSeconds: 10
             failureThreshold: 5
-          securityContext:
-            allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: false
       volumes:
         - name: wordpress-data
           persistentVolumeClaim:
