@@ -18,10 +18,18 @@ spec:
         runAsNonRoot: true
         runAsUser: 1000
         fsGroup: 1000
+        fsGroupChangePolicy: "OnRootMismatch"
         allowPrivilegeEscalation: false
         capabilities:
           drop:
             - ALL
+      initContainers:
+        - name: init-permissions
+          image: busybox:1.35
+          command: ["sh", "-c", "chown -R 1000:1000 /var/www/html && chmod -R 755 /var/www/html"]
+          volumeMounts:
+            - name: wordpress-data
+              mountPath: /var/www/html
       containers:
         - name: wordpress
           image: wordpress:6.7
@@ -46,6 +54,9 @@ spec:
                 secretKeyRef:
                   name: wordpress-secret
                   key: WORDPRESS_DB_PASSWORD
+            - name: WORDPRESS_CONFIG_EXTRA
+              value: |
+                define('FS_METHOD', 'direct');
           volumeMounts:
             - name: wordpress-data
               mountPath: /var/www/html
@@ -70,6 +81,9 @@ spec:
             initialDelaySeconds: 10
             periodSeconds: 10
             failureThreshold: 5
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
       volumes:
         - name: wordpress-data
           persistentVolumeClaim:
