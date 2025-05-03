@@ -19,7 +19,7 @@ spec:
       securityContext:
         runAsNonRoot: true
         runAsUser: 999  # MySQL user
-        fsGroup: 999    # MySQL group for volume permissions
+        fsGroup: 999    # Ensures mounted volumes have correct permissions
         allowPrivilegeEscalation: false
         capabilities:
           drop:
