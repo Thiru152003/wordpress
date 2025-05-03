@@ -1,45 +1,45 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: wordpress
+  name: mysql
   namespace: wordpress  # Replace with your actual namespace
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: wordpress
+      app: mysql
   template:
     metadata:
       labels:
-        app: wordpress
+        app: mysql
     spec:
-      automountServiceAccountToken: false  # Ensure service account token is not mounted
-      securityContext:
-        fsGroup: 999  # Apply security context at the pod level
       containers:
-        - name: wordpress
-          image: wordpress:latest
+        - name: mysql
+          image: mysql:8.0
           imagePullPolicy: Always
           env:
-            - name: WORDPRESS_DB_HOST
-              value: "mysql"
-            - name: WORDPRESS_DB_NAME
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: root_password
+            - name: MYSQL_DATABASE
               value: "wordpress"
-            - name: WORDPRESS_DB_USER
+            - name: MYSQL_USER
               valueFrom:
                 secretKeyRef:
                   name: mysql-secret
                   key: user
-            - name: WORDPRESS_DB_PASSWORD
+            - name: MYSQL_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: mysql-secret
                   key: password
           ports:
-            - containerPort: 80
+            - containerPort: 3306
           volumeMounts:
-            - name: wordpress-data
-              mountPath: /var/www/html
+            - name: mysql-data
+              mountPath: /var/lib/mysql
           resources:
             requests:
               memory: "512Mi"
@@ -48,25 +48,25 @@ spec:
               memory: "1Gi"
               cpu: "500m"
           securityContext:
-            allowPrivilegeEscalation: false  # Prevent privilege escalation
-            runAsNonRoot: true  # Ensure the container does not run as root
-            runAsUser: 1000  # Set a non-root user
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 999
             capabilities:
               drop:
-                - ALL  # Drop all unnecessary capabilities
+                - ALL
           livenessProbe:
-            httpGet:
-              path: /wp-login.php
-              port: 80
-            initialDelaySeconds: 30
-            periodSeconds: 10
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - mysqladmin ping -h 127.0.0.1
           readinessProbe:
-            httpGet:
-              path: /wp-login.php
-              port: 80
-            initialDelaySeconds: 10
-            periodSeconds: 5
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - mysqladmin ping -h 127.0.0.1
       volumes:
-        - name: wordpress-data
+        - name: mysql-data
           persistentVolumeClaim:
-            claimName: wordpress-pvc
+            claimName: mysql-pvc  # Replace with your PVC name
