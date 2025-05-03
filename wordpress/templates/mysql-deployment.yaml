@@ -1,48 +1,45 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mysql
+  name: wordpress
   namespace: wordpress  # Replace with your actual namespace
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: mysql
+      app: wordpress
   template:
     metadata:
       labels:
-        app: mysql
+        app: wordpress
     spec:
       automountServiceAccountToken: false  # Ensure service account token is not mounted
       securityContext:
-        fsGroup: 999  # Apply security context to the pod level
+        fsGroup: 999  # Apply security context at the pod level
       containers:
-        - name: mysql
-          image: mysql:8.0
+        - name: wordpress
+          image: wordpress:latest
           imagePullPolicy: Always
           env:
-            - name: MYSQL_ROOT_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: mysql-secret
-                  key: root_password
-            - name: MYSQL_DATABASE
+            - name: WORDPRESS_DB_HOST
+              value: "mysql"
+            - name: WORDPRESS_DB_NAME
               value: "wordpress"
-            - name: MYSQL_USER
+            - name: WORDPRESS_DB_USER
               valueFrom:
                 secretKeyRef:
                   name: mysql-secret
                   key: user
-            - name: MYSQL_PASSWORD
+            - name: WORDPRESS_DB_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: mysql-secret
                   key: password
           ports:
-            - containerPort: 3306
+            - containerPort: 80
           volumeMounts:
-            - name: mysql-data
-              mountPath: /var/lib/mysql
+            - name: wordpress-data
+              mountPath: /var/www/html
           resources:
             requests:
               memory: "512Mi"
@@ -51,29 +48,25 @@ spec:
               memory: "1Gi"
               cpu: "500m"
           securityContext:
-            allowPrivilegeEscalation: false
-            runAsNonRoot: true
-            runAsUser: 999
+            allowPrivilegeEscalation: false  # Prevent privilege escalation
+            runAsNonRoot: true  # Ensure the container does not run as root
+            runAsUser: 1000  # Set a non-root user
             capabilities:
               drop:
-                - ALL
+                - ALL  # Drop all unnecessary capabilities
           livenessProbe:
-            exec:
-              command:
-                - /bin/sh
-                - -c
-                - mysqladmin ping -h 127.0.0.1
+            httpGet:
+              path: /wp-login.php
+              port: 80
             initialDelaySeconds: 30
             periodSeconds: 10
-          readinessProbe:  # Added readiness probe
-            exec:
-              command:
-                - /bin/sh
-                - -c
-                - mysqladmin ping -h 127.0.0.1
+          readinessProbe:
+            httpGet:
+              path: /wp-login.php
+              port: 80
             initialDelaySeconds: 10
             periodSeconds: 5
       volumes:
-        - name: mysql-data
+        - name: wordpress-data
           persistentVolumeClaim:
-            claimName: mysql-pvc
+            claimName: wordpress-pvc
