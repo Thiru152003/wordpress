@@ -13,6 +13,9 @@ spec:
       labels:
         app: mysql
     spec:
+      automountServiceAccountToken: false  # Ensure service account token is not mounted
+      securityContext:
+        fsGroup: 999  # Apply security context to the pod level
       containers:
         - name: mysql
           image: mysql:8.0
@@ -59,4 +62,18 @@ spec:
               command:
                 - /bin/sh
                 - -c
-                - mysqladmin ping -h 127.0.0.
+                - mysqladmin ping -h 127.0.0.1
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:  # Added readiness probe
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - mysqladmin ping -h 127.0.0.1
+            initialDelaySeconds: 10
+            periodSeconds: 5
+      volumes:
+        - name: mysql-data
+          persistentVolumeClaim:
+            claimName: mysql-pvc
