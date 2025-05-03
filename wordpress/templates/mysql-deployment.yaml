@@ -18,8 +18,8 @@ spec:
       automountServiceAccountToken: false
       securityContext:
         runAsNonRoot: true
-        runAsUser: 999
-        fsGroup: 999         # ✅ This line is required to fix the permission issue
+        runAsUser: 999  # MySQL user
+        fsGroup: 999    # MySQL group for volume permissions
         allowPrivilegeEscalation: false
         capabilities:
           drop:
