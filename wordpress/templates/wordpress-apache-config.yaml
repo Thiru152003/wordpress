@@ -5,6 +5,7 @@ metadata:
   namespace: wordpress
 data:
   000-default.conf: |
+    ServerName localhost
     <VirtualHost *:8080>
         DocumentRoot /var/www/html
         <Directory /var/www/html>
@@ -14,3 +15,5 @@ data:
         ErrorLog ${APACHE_LOG_DIR}/error.log
         CustomLog ${APACHE_LOG_DIR}/access.log combined
     </VirtualHost>
+  ports.conf: |
+    Listen 8080
