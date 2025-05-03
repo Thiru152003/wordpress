@@ -3,18 +3,11 @@ kind: Deployment
 metadata:
   name: wordpress
   namespace: wordpress
-  labels:
-    app: wordpress
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: wordpress
-  strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 0
   template:
     metadata:
       labels:
@@ -22,28 +15,27 @@ spec:
     spec:
       automountServiceAccountToken: false
       securityContext:
-        runAsNonRoot: true
         fsGroup: 33
         fsGroupChangePolicy: "OnRootMismatch"
       initContainers:
-        - name: prepare-filesystem
+        - name: volume-prep
           image: busybox:1.35
-          command: ["sh", "-c", "mkdir -p /var/www/html/wp-content && chmod -R 775 /var/www/html"]
+          command: ["sh", "-c", "mkdir -p /var/www/html && chmod g+w /var/www/html"]
           securityContext:
             runAsUser: 33
             runAsGroup: 33
-            capabilities:
-              add: ["CHOWN", "FOWNER"]
           volumeMounts:
             - name: wordpress-data
               mountPath: /var/www/html
       containers:
         - name: wordpress
           image: wordpress:6.7-apache
-          imagePullPolicy: Always
+          securityContext:
+            runAsUser: 33
+            runAsGroup: 33
+            allowPrivilegeEscalation: false
           ports:
             - containerPort: 80
-              name: http
           env:
             - name: WORDPRESS_DB_HOST
               value: "mysql.wordpress.svc.cluster.local:3306"
@@ -65,44 +57,21 @@ spec:
             - name: WORDPRESS_CONFIG_EXTRA
               value: |
                 define('FS_METHOD', 'direct');
-                define('WP_HOME', 'http://${WORDPRESS_SERVICE_HOST}');
-                define('WP_SITEURL', 'http://${WORDPRESS_SERVICE_HOST}');
-            - name: APACHE_RUN_USER
-              value: www-data
-            - name: APACHE_RUN_GROUP
-              value: www-data
           volumeMounts:
             - name: wordpress-data
               mountPath: /var/www/html
-          resources:
-            requests:
-              memory: "256Mi"
-              cpu: "250m"
-            limits:
-              memory: "512Mi"
-              cpu: "500m"
           livenessProbe:
             httpGet:
               path: /
-              port: http
-            initialDelaySeconds: 120
+              port: 80
+            initialDelaySeconds: 60
             periodSeconds: 10
-            timeoutSeconds: 5
-            failureThreshold: 5
           readinessProbe:
             httpGet:
               path: /
-              port: http
-            initialDelaySeconds: 60
+              port: 80
+            initialDelaySeconds: 30
             periodSeconds: 10
-            timeoutSeconds: 5
-            failureThreshold: 5
-          securityContext:
-            runAsUser: 33
-            runAsGroup: 33
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop: ["ALL"]
       volumes:
         - name: wordpress-data
           persistentVolumeClaim:
