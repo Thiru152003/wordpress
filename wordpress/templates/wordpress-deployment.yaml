@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: wordpress
-  namespace: wordpress-namespace  # Avoid using default namespace
+  namespace: wordpress  # Avoid using default namespace
 spec:
   replicas: 1
   selector:
