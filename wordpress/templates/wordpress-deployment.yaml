@@ -30,22 +30,22 @@ spec:
             - containerPort: 80
           env:
             - name: WORDPRESS_DB_HOST
-              value: "mysql.wordpress.svc.cluster.local:3306"  # Adjust if different
+              value: "mysql.wordpress.svc.cluster.local:3306"
             - name: WORDPRESS_DB_NAME
               valueFrom:
                 configMapKeyRef:
                   name: wordpress-config
-                  key: db_name
+                  key: WORDPRESS_DB_NAME
             - name: WORDPRESS_DB_USER
               valueFrom:
                 secretKeyRef:
                   name: wordpress-secret
-                  key: db_user
+                  key: WORDPRESS_DB_USER
             - name: WORDPRESS_DB_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: wordpress-secret
-                  key: db_password
+                  key: WORDPRESS_DB_PASSWORD
           volumeMounts:
             - name: wordpress-data
               mountPath: /var/www/html
