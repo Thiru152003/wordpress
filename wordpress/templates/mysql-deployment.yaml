@@ -17,9 +17,7 @@ spec:
     spec:
       automountServiceAccountToken: false
       securityContext:
-        runAsNonRoot: true
-        runAsUser: 999    # MySQL user
-        fsGroup: 999      # Ensures group ownership of the volume
+        fsGroup: 999  # Needed for volume access
       initContainers:
         - name: init-mysql-permissions
           image: busybox
@@ -27,8 +25,7 @@ spec:
           volumeMounts:
             - name: mysql-data
               mountPath: /var/lib/mysql
-          securityContext:
-            runAsUser: 0
+          # No runAsUser: 0 here, so it defaults to root
       containers:
         - name: mysql
           image: mysql:8.0
