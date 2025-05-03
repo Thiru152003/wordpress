@@ -3,12 +3,11 @@ kind: PersistentVolumeClaim
 metadata:
   name: mysql-pvc
   namespace: wordpress
-  labels:
-    app.kubernetes.io/instance: wordpress
 spec:
   accessModes:
     - ReadWriteOnce
-  storageClassName: gp3
   resources:
     requests:
       storage: 10Gi
+  storageClassName: gp3
+  volumeName: mysql-pv
