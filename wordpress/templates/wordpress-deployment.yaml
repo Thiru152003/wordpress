@@ -34,11 +34,6 @@ spec:
             runAsUser: 33
             runAsGroup: 33
             allowPrivilegeEscalation: false
-          command: ["/bin/bash", "-c"]
-          args:
-            - |
-              cp /custom-config/apache-override.conf /etc/apache2/sites-available/000-default.conf && \
-              apache2-foreground
           ports:
             - containerPort: 8080
           env:
@@ -66,7 +61,8 @@ spec:
             - name: wordpress-data
               mountPath: /var/www/html
             - name: apache-config
-              mountPath: /custom-config
+              mountPath: /etc/apache2/sites-available/000-default.conf
+              subPath: 000-default.conf
           livenessProbe:
             httpGet:
               path: /
