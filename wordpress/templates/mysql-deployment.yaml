@@ -13,6 +13,14 @@ spec:
       labels:
         app: mysql
     spec:
+      automountServiceAccountToken: false  # Disable the mounting of service account tokens if not needed
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL
       containers:
         - name: mysql
           image: mysql:8.0
