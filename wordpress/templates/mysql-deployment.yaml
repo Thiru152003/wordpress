@@ -18,8 +18,17 @@ spec:
       automountServiceAccountToken: false
       securityContext:
         runAsNonRoot: true
-        runAsUser: 999
-        fsGroup: 999
+        runAsUser: 999    # MySQL user
+        fsGroup: 999      # Ensures group ownership of the volume
+      initContainers:
+        - name: init-mysql-permissions
+          image: busybox
+          command: ["sh", "-c", "chown -R 999:999 /var/lib/mysql"]
+          volumeMounts:
+            - name: mysql-data
+              mountPath: /var/lib/mysql
+          securityContext:
+            runAsUser: 0
       containers:
         - name: mysql
           image: mysql:8.0
