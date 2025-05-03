@@ -15,16 +15,10 @@ spec:
     spec:
       automountServiceAccountToken: false
       securityContext:
-        runAsNonRoot: true
         runAsUser: 999
+        runAsGroup: 999
         fsGroup: 999
-      initContainers:
-        - name: init-permissions
-          image: busybox
-          command: ["sh", "-c", "chown -R 999:999 /var/lib/mysql"]
-          volumeMounts:
-            - name: mysql-data
-              mountPath: /var/lib/mysql
+        fsGroupChangePolicy: "Always"
       containers:
         - name: mysql
           image: mysql:8.0
@@ -63,6 +57,7 @@ spec:
             allowPrivilegeEscalation: false
             runAsNonRoot: true
             runAsUser: 999
+            runAsGroup: 999
             capabilities:
               drop:
                 - ALL
