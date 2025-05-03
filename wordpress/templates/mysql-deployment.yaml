@@ -19,6 +19,7 @@ spec:
       securityContext:
         runAsNonRoot: true
         runAsUser: 999
+        fsGroup: 999         # ✅ This line is required to fix the permission issue
         allowPrivilegeEscalation: false
         capabilities:
           drop:
