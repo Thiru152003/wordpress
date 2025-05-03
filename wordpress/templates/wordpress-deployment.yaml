@@ -16,7 +16,7 @@ spec:
       automountServiceAccountToken: false
       securityContext:
         runAsNonRoot: true
-        runAsUser: 1000  # WordPress typically runs as www-data (UID 33 in Debian)
+        runAsUser: 1000
         fsGroup: 1000
         fsGroupChangePolicy: "OnRootMismatch"
         allowPrivilegeEscalation: false
@@ -57,33 +57,9 @@ spec:
             - name: WORDPRESS_CONFIG_EXTRA
               value: |
                 define('FS_METHOD', 'direct');
-            # Fix for Apache errors
-            - name: APACHE_CONFDIR
-              value: "/etc/apache2"
-            - name: APACHE_RUN_USER
-              value: "www-data"
-            - name: APACHE_RUN_GROUP
-              value: "www-data"
-            - name: APACHE_RUN_DIR
-              value: "/var/run/apache2"
-            - name: APACHE_PID_FILE
-              value: "/var/run/apache2/apache2.pid"
-            - name: APACHE_LOCK_DIR
-              value: "/var/lock/apache2"
-            - name: APACHE_LOG_DIR
-              value: "/var/log/apache2"
-            - name: APACHE_SERVERNAME
-              value: "localhost"
           volumeMounts:
             - name: wordpress-data
               mountPath: /var/www/html
-            # Additional volume mounts for Apache
-            - name: apache-run
-              mountPath: /var/run/apache2
-            - name: apache-lock
-              mountPath: /var/lock/apache2
-            - name: apache-log
-              mountPath: /var/log/apache2
           resources:
             requests:
               memory: "256Mi"
@@ -108,17 +84,7 @@ spec:
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: false
-            # WordPress/Apache typically runs as www-data (UID 33)
-            runAsUser: 33
-            runAsGroup: 33
       volumes:
         - name: wordpress-data
           persistentVolumeClaim:
             claimName: wordpress-pvc
-        # Additional volumes for Apache
-        - name: apache-run
-          emptyDir: {}
-        - name: apache-lock
-          emptyDir: {}
-        - name: apache-log
-          emptyDir: {}
