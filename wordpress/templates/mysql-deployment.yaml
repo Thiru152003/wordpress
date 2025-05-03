@@ -3,6 +3,8 @@ kind: Deployment
 metadata:
   name: mysql
   namespace: wordpress
+  labels:
+    app: mysql
 spec:
   replicas: 1
   selector:
@@ -15,10 +17,12 @@ spec:
     spec:
       automountServiceAccountToken: false
       securityContext:
+        runAsNonRoot: true
         runAsUser: 999
-        runAsGroup: 999
-        fsGroup: 999
-        fsGroupChangePolicy: "Always"
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL
       containers:
         - name: mysql
           image: mysql:8.0
@@ -54,29 +58,26 @@ spec:
               memory: "1Gi"
               cpu: "500m"
           securityContext:
-            allowPrivilegeEscalation: false
             runAsNonRoot: true
             runAsUser: 999
-            runAsGroup: 999
+            allowPrivilegeEscalation: false
             capabilities:
               drop:
                 - ALL
           livenessProbe:
-            exec:
-              command:
-                - /bin/sh
-                - -c
-                - mysqladmin ping -h 127.0.0.1
-            initialDelaySeconds: 20
+            tcpSocket:
+              port: 3306
+            initialDelaySeconds: 30
             periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
           readinessProbe:
-            exec:
-              command:
-                - /bin/sh
-                - -c
-                - mysqladmin ping -h 127.0.0.1
+            tcpSocket:
+              port: 3306
             initialDelaySeconds: 5
             periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
       volumes:
         - name: mysql-data
           persistentVolumeClaim:
