@@ -15,14 +15,18 @@ spec:
     spec:
       automountServiceAccountToken: false
       securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000  # WordPress typically runs as www-data (UID 33 in Debian)
         fsGroup: 1000
         fsGroupChangePolicy: "OnRootMismatch"
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL
       initContainers:
         - name: init-permissions
           image: busybox:1.35
           command: ["sh", "-c", "chown -R 1000:1000 /var/www/html && chmod -R 755 /var/www/html"]
-          securityContext:
-            runAsUser: 0  # Run as root temporarily to set permissions
           volumeMounts:
             - name: wordpress-data
               mountPath: /var/www/html
@@ -53,16 +57,33 @@ spec:
             - name: WORDPRESS_CONFIG_EXTRA
               value: |
                 define('FS_METHOD', 'direct');
+            # Fix for Apache errors
+            - name: APACHE_CONFDIR
+              value: "/etc/apache2"
+            - name: APACHE_RUN_USER
+              value: "www-data"
+            - name: APACHE_RUN_GROUP
+              value: "www-data"
+            - name: APACHE_RUN_DIR
+              value: "/var/run/apache2"
+            - name: APACHE_PID_FILE
+              value: "/var/run/apache2/apache2.pid"
+            - name: APACHE_LOCK_DIR
+              value: "/var/lock/apache2"
+            - name: APACHE_LOG_DIR
+              value: "/var/log/apache2"
+            - name: APACHE_SERVERNAME
+              value: "localhost"
           volumeMounts:
             - name: wordpress-data
               mountPath: /var/www/html
-          securityContext:
-            runAsUser: 1000
-            runAsGroup: 1000
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop:
-                - ALL
+            # Additional volume mounts for Apache
+            - name: apache-run
+              mountPath: /var/run/apache2
+            - name: apache-lock
+              mountPath: /var/lock/apache2
+            - name: apache-log
+              mountPath: /var/log/apache2
           resources:
             requests:
               memory: "256Mi"
@@ -84,7 +105,20 @@ spec:
             initialDelaySeconds: 10
             periodSeconds: 10
             failureThreshold: 5
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            # WordPress/Apache typically runs as www-data (UID 33)
+            runAsUser: 33
+            runAsGroup: 33
       volumes:
         - name: wordpress-data
           persistentVolumeClaim:
             claimName: wordpress-pvc
+        # Additional volumes for Apache
+        - name: apache-run
+          emptyDir: {}
+        - name: apache-lock
+          emptyDir: {}
+        - name: apache-log
+          emptyDir: {}
