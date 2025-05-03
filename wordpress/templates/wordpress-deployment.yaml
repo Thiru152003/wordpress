@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: wordpress
-  namespace: wordpress  # Avoid using default namespace
+  namespace: wordpress
 spec:
   replicas: 1
   selector:
@@ -13,52 +13,63 @@ spec:
       labels:
         app: wordpress
     spec:
-      automountServiceAccountToken: false  # Disable the automatic mounting of service account tokens if not needed
+      automountServiceAccountToken: false
       securityContext:
-        runAsNonRoot: true  # Ensure the container does not run as root
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
         allowPrivilegeEscalation: false
         capabilities:
           drop:
-            - ALL  # Drop all unnecessary capabilities
+            - ALL
       containers:
         - name: wordpress
           image: wordpress:6.7
-          imagePullPolicy: Always  # Enforcing Always pull policy
+          imagePullPolicy: Always
           ports:
             - containerPort: 80
-          envFrom:
-            - configMapRef:
-                name: wordpress-config
+          env:
+            - name: WORDPRESS_DB_HOST
+              value: "mysql.wordpress.svc.cluster.local:3306"  # Adjust if different
+            - name: WORDPRESS_DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: wordpress-config
+                  key: db_name
+            - name: WORDPRESS_DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: wordpress-secret
+                  key: db_user
+            - name: WORDPRESS_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: wordpress-secret
+                  key: db_password
           volumeMounts:
             - name: wordpress-data
               mountPath: /var/www/html
           resources:
             requests:
-              memory: "256Mi"  # Setting memory requests
-              cpu: "250m"  # Setting CPU requests
+              memory: "256Mi"
+              cpu: "250m"
             limits:
-              memory: "512Mi"  # Setting memory limits
-              cpu: "500m"  # Setting CPU limits
+              memory: "512Mi"
+              cpu: "500m"
           livenessProbe:
             httpGet:
-              path: /wp-admin
+              path: /
               port: 80
             initialDelaySeconds: 30
             periodSeconds: 10
-            failureThreshold: 3
+            failureThreshold: 5
           readinessProbe:
             httpGet:
-              path: /wp-admin
+              path: /
               port: 80
-            initialDelaySeconds: 5
+            initialDelaySeconds: 10
             periodSeconds: 10
-            failureThreshold: 3
-          securityContext:
-            runAsNonRoot: true  # Ensure the container doesn't run as root
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop:
-                - ALL  # Drop all unnecessary capabilities
+            failureThreshold: 5
       volumes:
         - name: wordpress-data
           persistentVolumeClaim:
