@@ -4,11 +4,10 @@ metadata:
   name: wordpress-apache-config
   namespace: wordpress
 data:
-  apache-override.conf: |
+  000-default.conf: |
     <VirtualHost *:8080>
         DocumentRoot /var/www/html
         <Directory /var/www/html>
-            Options Indexes FollowSymLinks
             AllowOverride All
             Require all granted
         </Directory>
