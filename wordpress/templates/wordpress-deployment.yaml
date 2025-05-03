@@ -13,27 +13,21 @@ spec:
       labels:
         app: wordpress
     spec:
-      automountServiceAccountToken: false
       securityContext:
         fsGroup: 33
         fsGroupChangePolicy: "OnRootMismatch"
       initContainers:
-        - name: volume-prep
+        - name: volume-permissions
           image: busybox:1.35
-          command: ["sh", "-c", "mkdir -p /var/www/html && chown -R 33:33 /var/www/html && chmod -R 777 /var/www/html"]
+          command: ["/bin/sh", "-c", "chown -R 33:33 /var/www/html && chmod -R 775 /var/www/html"]
           securityContext:
-            runAsUser: 33
-            runAsGroup: 33
+            runAsUser: 0  # Root required to set ownership
           volumeMounts:
             - name: wordpress-data
               mountPath: /var/www/html
       containers:
         - name: wordpress
           image: wordpress:6.7-apache
-          securityContext:
-            runAsUser: 33
-            runAsGroup: 33
-            allowPrivilegeEscalation: false
           ports:
             - containerPort: 80
           env:
@@ -57,6 +51,10 @@ spec:
             - name: WORDPRESS_CONFIG_EXTRA
               value: |
                 define('FS_METHOD', 'direct');
+          securityContext:
+            runAsUser: 33
+            runAsGroup: 33
+            allowPrivilegeEscalation: false
           volumeMounts:
             - name: wordpress-data
               mountPath: /var/www/html
