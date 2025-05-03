@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: mysql
-  namespace: wordpress  # Replace with your actual namespace
+  namespace: wordpress
 spec:
   replicas: 1
   selector:
@@ -13,14 +13,18 @@ spec:
       labels:
         app: mysql
     spec:
-      automountServiceAccountToken: false  # Disable the mounting of service account tokens if not needed
+      automountServiceAccountToken: false
       securityContext:
         runAsNonRoot: true
         runAsUser: 999
-        allowPrivilegeEscalation: false
-        capabilities:
-          drop:
-            - ALL
+        fsGroup: 999
+      initContainers:
+        - name: init-permissions
+          image: busybox
+          command: ["sh", "-c", "chown -R 999:999 /var/lib/mysql"]
+          volumeMounts:
+            - name: mysql-data
+              mountPath: /var/lib/mysql
       containers:
         - name: mysql
           image: mysql:8.0
@@ -68,13 +72,17 @@ spec:
                 - /bin/sh
                 - -c
                 - mysqladmin ping -h 127.0.0.1
+            initialDelaySeconds: 20
+            periodSeconds: 10
           readinessProbe:
             exec:
               command:
                 - /bin/sh
                 - -c
                 - mysqladmin ping -h 127.0.0.1
+            initialDelaySeconds: 5
+            periodSeconds: 10
       volumes:
         - name: mysql-data
           persistentVolumeClaim:
-            claimName: mysql-pvc  # Replace with your PVC name
+            claimName: mysql-pvc
