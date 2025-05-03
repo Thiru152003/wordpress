@@ -20,7 +20,7 @@ spec:
       initContainers:
         - name: volume-prep
           image: busybox:1.35
-          command: ["sh", "-c", "mkdir -p /var/www/html && chmod g+w /var/www/html"]
+          command: ["sh", "-c", "mkdir -p /var/www/html && chown -R 33:33 /var/www/html && chmod -R 777 /var/www/html"]
           securityContext:
             runAsUser: 33
             runAsGroup: 33
