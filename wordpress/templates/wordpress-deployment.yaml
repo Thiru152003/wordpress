@@ -20,9 +20,10 @@ spec:
       initContainers:
         - name: volume-prep
           image: busybox:1.35
-          command: ["sh", "-c", "mkdir -p /var/www/html && chown -R 33:33 /var/www/html && chmod -R 775 /var/www/html"]
+          command: ["sh", "-c", "mkdir -p /var/www/html && chown -R 33:33 /var/www/html && chmod -R 777 /var/www/html"]
           securityContext:
-            runAsUser: 0  # Root needed to set ownership
+            runAsUser: 33
+            runAsGroup: 33
           volumeMounts:
             - name: wordpress-data
               mountPath: /var/www/html
@@ -33,8 +34,13 @@ spec:
             runAsUser: 33
             runAsGroup: 33
             allowPrivilegeEscalation: false
+          command: ["/bin/bash", "-c"]
+          args:
+            - |
+              cp /custom-config/apache-override.conf /etc/apache2/sites-available/000-default.conf && \
+              apache2-foreground
           ports:
-            - containerPort: 8080  # Use non-root port
+            - containerPort: 8080
           env:
             - name: WORDPRESS_DB_HOST
               value: "mysql.wordpress.svc.cluster.local:3306"
@@ -56,11 +62,11 @@ spec:
             - name: WORDPRESS_CONFIG_EXTRA
               value: |
                 define('FS_METHOD', 'direct');
-                define('WP_SITEURL', 'http://blog.cloudmasa.com');
-                define('WP_HOME', 'http://blog.cloudmasa.com');
           volumeMounts:
             - name: wordpress-data
               mountPath: /var/www/html
+            - name: apache-config
+              mountPath: /custom-config
           livenessProbe:
             httpGet:
               path: /
@@ -77,3 +83,6 @@ spec:
         - name: wordpress-data
           persistentVolumeClaim:
             claimName: wordpress-pvc
+        - name: apache-config
+          configMap:
+            name: wordpress-apache-config
