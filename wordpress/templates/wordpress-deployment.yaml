@@ -13,6 +13,13 @@ spec:
       labels:
         app: wordpress
     spec:
+      automountServiceAccountToken: false  # Disable the automatic mounting of service account tokens if not needed
+      securityContext:
+        runAsNonRoot: true  # Ensure the container does not run as root
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL  # Drop all unnecessary capabilities
       containers:
         - name: wordpress
           image: wordpress:6.7
@@ -49,6 +56,9 @@ spec:
           securityContext:
             runAsNonRoot: true  # Ensure the container doesn't run as root
             allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL  # Drop all unnecessary capabilities
       volumes:
         - name: wordpress-data
           persistentVolumeClaim:
