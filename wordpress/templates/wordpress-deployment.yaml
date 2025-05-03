@@ -23,8 +23,8 @@ spec:
       automountServiceAccountToken: false
       securityContext:
         runAsNonRoot: true
-        runAsUser: 33  # Changed to www-data user (UID 33)
-        fsGroup: 33    # Changed to www-data group (GID 33)
+        runAsUser: 33  # www-data user (UID 33)
+        fsGroup: 33    # www-data group (GID 33)
         fsGroupChangePolicy: "OnRootMismatch"
         allowPrivilegeEscalation: false
         capabilities:
@@ -35,13 +35,15 @@ spec:
           image: busybox:1.35
           command: ["sh", "-c", "chown -R 33:33 /var/www/html && chmod -R 755 /var/www/html"]
           securityContext:
-            runAsUser: 0  # Temporary root access for permission changes
+            runAsUser: 33  # Changed from 0 to maintain non-root policy
+            runAsGroup: 33
+            allowPrivilegeEscalation: false
           volumeMounts:
             - name: wordpress-data
               mountPath: /var/www/html
       containers:
         - name: wordpress
-          image: wordpress:6.7-apache  # Using the Apache-specific image
+          image: wordpress:6.7-apache
           imagePullPolicy: Always
           ports:
             - containerPort: 80
@@ -94,7 +96,7 @@ spec:
             httpGet:
               path: /
               port: http
-            initialDelaySeconds: 30
+            initialDelaySeconds: 60  # Increased for initialization
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 5
@@ -102,7 +104,7 @@ spec:
             httpGet:
               path: /
               port: http
-            initialDelaySeconds: 10
+            initialDelaySeconds: 30  # Increased for initialization
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 5
