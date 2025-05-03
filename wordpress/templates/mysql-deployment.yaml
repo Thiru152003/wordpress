@@ -20,7 +20,7 @@ spec:
             - name: mysql-data
               mountPath: /var/lib/mysql
           securityContext:
-            runAsUser: 0  # This allows the init container to run as root for permission fixing
+            runAsUser: 0  # Run as root for permission fixing
       containers:
         - name: mysql
           image: {{ .Values.mysql.image }}
