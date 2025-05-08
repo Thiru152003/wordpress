@@ -6,13 +6,19 @@ metadata:
 data:
   000-default.conf: |
     <VirtualHost *:80>
+        # The root directory of the website
         DocumentRoot /var/www/html
-        <Directory "/var/www/html">
-            AllowOverride All
-            Require all granted
+
+        # Directory settings for /var/www/html
+        <Directory /var/www/html>
+            AllowOverride All  # Allow .htaccess overrides
+            Require all granted  # Allow access to everyone
         </Directory>
+
+        # Log file settings
         ErrorLog ${APACHE_LOG_DIR}/error.log
         CustomLog ${APACHE_LOG_DIR}/access.log combined
     </VirtualHost>
+
   ports.conf: |
-    Listen 80
+    Listen 80  # Ensures Apache listens on port 80
