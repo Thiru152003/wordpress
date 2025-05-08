@@ -20,7 +20,14 @@ spec:
       initContainers:
         - name: volume-prep
           image: busybox:1.35
-          command: ["sh", "-c", "sleep 5 && mkdir -p /var/www/html && chown -R 33:33 /var/www/html && chmod -R 775 /var/www/html"]
+          command:
+            - sh
+            - -c
+            - |
+              sleep 5 && \
+              mkdir -p /var/www/html && \
+              chown -R 33:33 /var/www/html && \
+              chmod -R 775 /var/www/html
           securityContext:
             runAsUser: 0
             runAsGroup: 0
@@ -31,8 +38,8 @@ spec:
         - name: wordpress
           image: wordpress:6.7-apache
           securityContext:
-            runAsUser: 33  # WordPress runs as user 33 (www-data)
-            runAsGroup: 33  # Group 33 (www-data)
+            runAsUser: 33
+            runAsGroup: 33
             allowPrivilegeEscalation: false
           ports:
             - containerPort: 80
@@ -62,15 +69,6 @@ spec:
           volumeMounts:
             - name: wordpress-data
               mountPath: /var/www/html
-            - name: apache-config
-              mountPath: /etc/apache2/sites-available/000-default.conf
-              subPath: 000-default.conf
-            - name: apache-config
-              mountPath: /etc/apache2/ports.conf
-              subPath: ports.conf
-            - name: apache-config
-              mountPath: /etc/apache2/conf-available/servername.conf
-              subPath: servername.conf  # Add this to resolve ServerName issue
           livenessProbe:
             httpGet:
               path: /
@@ -91,6 +89,3 @@ spec:
         - name: wordpress-data
           persistentVolumeClaim:
             claimName: wordpress-pvc
-        - name: apache-config
-          configMap:
-            name: wordpress-apache-config
