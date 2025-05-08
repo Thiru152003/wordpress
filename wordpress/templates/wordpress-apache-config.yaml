@@ -6,7 +6,7 @@ metadata:
 data:
   000-default.conf: |
     <VirtualHost *:80>
-        ServerName docs.cloudmasa.com  # Set the actual domain name here
+        ServerName docs.cloudmasa.com  # Replace with your actual server/domain name
         DocumentRoot /var/www/html
         <Directory /var/www/html>
             AllowOverride All
@@ -20,4 +20,4 @@ data:
     Listen 80
 
   servername.conf: |
-    ServerName docs.cloudmasa.com  # Set the actual domain name here
+    ServerName docs.cloudmasa.com  # Replace with your actual server/domain name
