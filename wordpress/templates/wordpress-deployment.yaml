@@ -36,13 +36,13 @@ spec:
               mountPath: /var/www/html
       containers:
         - name: wordpress
-          image: wordpress:6.7-apache
+          image: wordpress:6.7-fpm
           securityContext:
             runAsUser: 33
             runAsGroup: 33
             allowPrivilegeEscalation: false
           ports:
-            - containerPort: 80
+            - containerPort: 9000  # FPM default port
           env:
             - name: WORDPRESS_DB_HOST
               value: "mysql.wordpress.svc.cluster.local:3306"
@@ -70,17 +70,15 @@ spec:
             - name: wordpress-data
               mountPath: /var/www/html
           livenessProbe:
-            httpGet:
-              path: /
-              port: 80
+            tcpSocket:
+              port: 9000
             initialDelaySeconds: 180
             periodSeconds: 10
             timeoutSeconds: 10
             failureThreshold: 10
           readinessProbe:
-            httpGet:
-              path: /
-              port: 80
+            tcpSocket:
+              port: 9000
             initialDelaySeconds: 150
             periodSeconds: 10
             timeoutSeconds: 10
