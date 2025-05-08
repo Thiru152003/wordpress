@@ -6,7 +6,7 @@ metadata:
 data:
   000-default.conf: |
     <VirtualHost *:80>
-        ServerName localhost  # Add ServerName here
+        ServerName docs.cloudmasa.com  # Set the actual domain name here
         DocumentRoot /var/www/html
         <Directory /var/www/html>
             AllowOverride All
@@ -20,4 +20,4 @@ data:
     Listen 80
 
   servername.conf: |
-    ServerName localhost  # Add ServerName here to resolve the Apache warning
+    ServerName docs.cloudmasa.com  # Set the actual domain name here
