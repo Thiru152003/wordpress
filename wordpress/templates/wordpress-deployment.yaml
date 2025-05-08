@@ -31,8 +31,8 @@ spec:
         - name: wordpress
           image: wordpress:6.7-apache
           securityContext:
-            runAsUser: 33
-            runAsGroup: 33
+            runAsUser: 33  # WordPress runs as user 33 (www-data)
+            runAsGroup: 33  # Group 33 (www-data)
             allowPrivilegeEscalation: false
           ports:
             - containerPort: 80
@@ -57,6 +57,8 @@ spec:
             - name: WORDPRESS_CONFIG_EXTRA
               value: |
                 define('FS_METHOD', 'direct');
+                define('WP_HOME', 'http://docs.cloudmasa.com');
+                define('WP_SITEURL', 'http://docs.cloudmasa.com');
           volumeMounts:
             - name: wordpress-data
               mountPath: /var/www/html
@@ -66,6 +68,9 @@ spec:
             - name: apache-config
               mountPath: /etc/apache2/ports.conf
               subPath: ports.conf
+            - name: apache-config
+              mountPath: /etc/apache2/conf-available/servername.conf
+              subPath: servername.conf  # Add this to resolve ServerName issue
           livenessProbe:
             httpGet:
               path: /
