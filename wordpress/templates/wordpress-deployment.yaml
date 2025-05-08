@@ -16,11 +16,11 @@ spec:
       automountServiceAccountToken: false
       securityContext:
         fsGroup: 33
-        fsGroupChangePolicy: "OnRootMismatch"
+        fsGroupChangePolicy: "Always"
       initContainers:
         - name: volume-prep
           image: busybox:1.35
-          command: ["sh", "-c", "mkdir -p /var/www/html && chown -R 33:33 /var/www/html && chmod -R 775 /var/www/html"]
+          command: ["sh", "-c", "sleep 5 && mkdir -p /var/www/html && chown -R 33:33 /var/www/html && chmod -R 775 /var/www/html"]
           securityContext:
             runAsUser: 0
             runAsGroup: 0
@@ -70,17 +70,17 @@ spec:
             httpGet:
               path: /
               port: 80
-            initialDelaySeconds: 120
+            initialDelaySeconds: 180
             periodSeconds: 10
-            timeoutSeconds: 5
+            timeoutSeconds: 10
             failureThreshold: 10
           readinessProbe:
             httpGet:
               path: /
               port: 80
-            initialDelaySeconds: 90
+            initialDelaySeconds: 150
             periodSeconds: 10
-            timeoutSeconds: 5
+            timeoutSeconds: 10
             failureThreshold: 10
       volumes:
         - name: wordpress-data
