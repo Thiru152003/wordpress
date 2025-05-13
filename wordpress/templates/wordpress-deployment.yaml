@@ -39,7 +39,15 @@ spec:
           image: wordpress:6.7
           imagePullPolicy: IfNotPresent
           securityContext:
+            runAsUser: 33
+            runAsGroup: 33
             allowPrivilegeEscalation: false
+          command:
+            - bash
+            - -c
+            - |
+              echo "ServerName localhost" >> /etc/apache2/apache2.conf && \
+              docker-entrypoint.sh apache2-foreground
           ports:
             - containerPort: 80
           env:
