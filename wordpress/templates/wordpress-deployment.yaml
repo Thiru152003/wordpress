@@ -17,32 +17,16 @@ spec:
       securityContext:
         fsGroup: 33
         fsGroupChangePolicy: "Always"
-      initContainers:
-        - name: volume-prep
-          image: busybox:1.35
-          command:
-            - sh
-            - -c
-            - |
-              sleep 5 && \
-              mkdir -p /var/www/html && \
-              chown -R 33:33 /var/www/html && \
-              chmod -R 775 /var/www/html
-          securityContext:
-            runAsUser: 0
-            runAsGroup: 0
-          volumeMounts:
-            - name: wordpress-data
-              mountPath: /var/www/html
       containers:
         - name: wordpress
-          image: wordpress:6.7-fpm
+          image: wordpress:6.7
+          imagePullPolicy: IfNotPresent
           securityContext:
             runAsUser: 33
             runAsGroup: 33
             allowPrivilegeEscalation: false
           ports:
-            - containerPort: 9000  # FPM default port
+            - containerPort: 80
           env:
             - name: WORDPRESS_DB_HOST
               value: "mysql.wordpress.svc.cluster.local:3306"
@@ -70,19 +54,21 @@ spec:
             - name: wordpress-data
               mountPath: /var/www/html
           livenessProbe:
-            tcpSocket:
-              port: 9000
-            initialDelaySeconds: 180
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 60
             periodSeconds: 10
-            timeoutSeconds: 10
-            failureThreshold: 10
+            timeoutSeconds: 5
+            failureThreshold: 5
           readinessProbe:
-            tcpSocket:
-              port: 9000
-            initialDelaySeconds: 150
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 30
             periodSeconds: 10
-            timeoutSeconds: 10
-            failureThreshold: 10
+            timeoutSeconds: 5
+            failureThreshold: 5
       volumes:
         - name: wordpress-data
           persistentVolumeClaim:
