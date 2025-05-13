@@ -18,4 +18,4 @@ spec:
               service:
                 name: wordpress
                 port:
-                  number: 8089
+                  number: 9000
