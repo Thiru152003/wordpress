@@ -15,4 +15,4 @@ spec:
     - name: http
       protocol: TCP
       port: 80
-      targetPort: 8089  # This MUST match the containerPort defined in your Deployment
+      targetPort: 9000  # This MUST match the containerPort defined in your Deployment
