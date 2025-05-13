@@ -5,6 +5,8 @@ metadata:
   namespace: wordpress
   annotations:
     kubernetes.io/ingress.class: "nginx"
+  labels:
+    argocd.argoproj.io/instance: wordpress
 spec:
   rules:
     - host: docs.cloudmasa.com
