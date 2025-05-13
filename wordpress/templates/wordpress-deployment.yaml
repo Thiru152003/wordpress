@@ -36,7 +36,7 @@ spec:
               mountPath: /var/www/html
       containers:
         - name: wordpress
-          image: wordpress:6.7
+          image: wordpress:6.7-fpm
           securityContext:
             runAsUser: 33
             runAsGroup: 33
