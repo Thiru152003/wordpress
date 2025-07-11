@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ssl-redirect
+  namespace: wordpress
+spec:
+  ports:
+    - name: use-annotation
+      port: 80
+      targetPort: 80
+  selector:
+    app: wordpress  # points to the WordPress pod, but won't be used
+  type: ClusterIP
