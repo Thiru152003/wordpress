@@ -2,14 +2,12 @@ apiVersion: v1
 kind: Service
 metadata:
   name: wordpress
-  annotations:
-    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
-    service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+  namespace: wordpress
 spec:
   selector:
     app: wordpress
   ports:
     - protocol: TCP
-      port: 80
-      targetPort: 80
-  type: LoadBalancer
+      port: 80         # Port ALB will forward to
+      targetPort: 8089 # The containerPort in your WordPress pod
+  type: ClusterIP
