@@ -8,6 +8,6 @@ spec:
     app: wordpress
   ports:
     - protocol: TCP
-      port: 80         # Port ALB will forward to
-      targetPort: 8089 # The containerPort in your WordPress pod
+      port: 80         # Port ALB will use
+      targetPort: 80   # ✅ Must match container port in the pod
   type: ClusterIP
