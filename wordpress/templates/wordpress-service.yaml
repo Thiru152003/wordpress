@@ -9,5 +9,5 @@ spec:
   ports:
     - protocol: TCP
       port: 80         # Port ALB will use
-      targetPort: 80   # ✅ Must match container port in the pod
+      targetPort: 8089   # ✅ Must match container port in the pod
   type: ClusterIP
