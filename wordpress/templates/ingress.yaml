@@ -4,20 +4,41 @@ metadata:
   name: wordpress-ingress
   namespace: wordpress
   annotations:
+    # ALB Ingress Class
     kubernetes.io/ingress.class: alb
+
+    # Internet-facing ALB
     alb.ingress.kubernetes.io/scheme: internet-facing
+
+    # ALB Target Type
     alb.ingress.kubernetes.io/target-type: ip
+
+    # SSL Certificate
     alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:721249950004:certificate/0bafab85-2687-462d-9ceb-385742e8d484
+
+    # Listen on both HTTP and HTTPS
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+
+    # Grouping and naming
     alb.ingress.kubernetes.io/group.name: wordpress-alb-group
     alb.ingress.kubernetes.io/load-balancer-name: wordpress-blog-alb
+
+    # Subnets for ALB
     alb.ingress.kubernetes.io/subnets: subnet-072c7ea3741b8ad57,subnet-0e2c56cb126ebd0e0
+
+    # Backend protocol to service
     alb.ingress.kubernetes.io/backend-protocol: HTTP
+
+    # Health check configuration
     alb.ingress.kubernetes.io/healthcheck-path: /
     alb.ingress.kubernetes.io/healthcheck-port: "80"
     alb.ingress.kubernetes.io/healthcheck-protocol: HTTP
     alb.ingress.kubernetes.io/success-codes: '200-399'
+
+    # Automatically manage SG rules
     alb.ingress.kubernetes.io/manage-backend-security-group-rules: "true"
+
+    # Force SSL redirection
     alb.ingress.kubernetes.io/force-ssl-redirect: "true"
     alb.ingress.kubernetes.io/actions.ssl-redirect: >
       {
@@ -28,11 +49,13 @@ metadata:
           "StatusCode": "HTTP_301"
         }
       }
+
 spec:
   rules:
     - host: docs.cloudmasa.com
       http:
         paths:
+          # HTTP traffic redirected to HTTPS
           - path: /*
             pathType: ImplementationSpecific
             backend:
@@ -40,6 +63,7 @@ spec:
                 name: ssl-redirect
                 port:
                   name: use-annotation
+          # Actual WordPress backend
           - path: /
             pathType: Prefix
             backend:
